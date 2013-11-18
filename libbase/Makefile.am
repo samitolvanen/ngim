@@ -1,0 +1,5 @@
+EXTRA_DIST = reconf
+ACLOCAL_AMFLAGS = -I m4
+
+bin_SCRIPTS = @PACKAGE_TARNAME@-config
+SUBDIRS = m4 lib

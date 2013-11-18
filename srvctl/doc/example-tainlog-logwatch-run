@@ -1,0 +1,24 @@
+#!/bin/sh
+# TODO: Edit these to match the environment, and run this script from cron
+LOGS="/path/to/tainlog
+/path/to/another/tainlog"
+
+PATH="/usr/local/bin:$PATH"
+LOGWATCH="tainlog-logwatch"
+
+# Run LOGWATCH for each logfile, and print out results
+IFS='
+'
+for i in $LOGS; do
+	RESULTS=`$LOGWATCH $i`
+
+	if [ -n "$RESULTS" ]; then
+		echo "$LOGWATCH results for $i:"
+		for j in $RESULTS; do
+			echo $j
+		done
+		echo
+	fi
+done
+
+exit 0

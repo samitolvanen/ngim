@@ -1,0 +1,63 @@
+#!/bin/sh
+# TODO: Edit these to match the environment
+LOGDIR="$1"
+LASTSEEN="$HOME/.tainlog-logwatch-`echo $LOGDIR | sed -e 's/\//\_/g' | sed -e 's/\./\_/g'`"
+
+if [ ! -d "$LOGDIR" ]; then
+	echo "tainlog-logwatch: invalid directory"
+	exit 0
+fi
+
+# Constants
+IFS='
+'
+
+# Variables
+LASTISO=""
+NEXTISO=""
+
+if [ -s "$LASTSEEN" ]; then
+	LASTISO=`cat $LASTSEEN`
+fi
+
+# Find all logfiles
+LOGFILES=`for i in $( ls "$LOGDIR"/@* 2>/dev/null ); do echo "$( basename $i | taiconv ) $( basename $i )"; done | sort ; echo current`
+
+# Only look in 'current' and files rotated after last run
+for i in $LOGFILES; do
+	CURRENT=`echo $i | awk '{ print $NF }'`
+
+	if [[ "$i" < "$LASTISO" ]]; then
+		continue
+	fi
+
+	# The last seen time stamp is on the last line of the file
+	NEXTISO=`tail -n1 "$LOGDIR/$CURRENT" | awk '{ print $1 }' | taiconv`
+
+	# Look for warnings and fatal errors
+	# TODO: Edit grep parameters to filter other result lines of choice
+	LINES=`grep -v "\ information\:\ " "$LOGDIR/$CURRENT" | taiconv`
+
+	if [ $? -ne 0 ]; then
+		continue
+	fi
+
+	# Print out only lines written after the last run
+	for j in $LINES; do
+		t=`echo $j | awk '{ print $1, $2 }'`
+		if [[ "$t" < "$LASTISO" || "$t" == "$LASTISO" ]]; then
+			continue
+		fi
+
+		echo "$j"
+	done
+done
+
+# Update last seen time stamp
+if [[ "$NEXTISO" < "$LASTISO" ]]; then
+	NEXTISO="$LASTISO"
+fi
+
+echo "$NEXTISO" > "$LASTSEEN"
+
+exit 0

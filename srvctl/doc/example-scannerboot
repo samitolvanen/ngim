@@ -1,0 +1,13 @@
+#!/bin/sh
+# TODO: Edit these to match the environment
+SRVCTL_BASE="/share/services"
+PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
+
+# Set file descriptors
+exec </dev/null >/dev/null 2>&1
+
+# Stop possibly running services
+srvctl --base $SRVCTL_BASE --kill-all
+
+env - PATH=$PATH scanner $SRVCTL_BASE 2>&1 |\
+env - PATH=$PATH tainlog $SRVCTL_BASE

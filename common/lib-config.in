@@ -1,0 +1,114 @@
+#!/bin/sh
+#
+# @PACKAGE_TARNAME@-config
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+bindir="@bindir@"
+libdir="@libdir@"
+includedir="@includedir@"
+libdir="@libdir@"
+libname="@PACKAGE_LIBNAME@"
+version="@PACKAGE_VERSION@"
+
+usage()
+{
+    cat <<EOF
+Usage: @PACKAGE_TARNAME@-config [OPTIONS]
+Options:
+  --prefix          print prefix for installation
+  --bindir          print location where binaries are installed
+  --includedir      print location where headers are installed
+  --includes        print include information
+  --libdir          print location where libraries are installed
+  --libname         print name of the library
+  --link            print link switch(es) for linking
+  --version         print the package version
+  --help            print this help
+EOF
+    exit $1
+}
+
+if test $# -eq 0; then
+    usage 1 1>&2
+fi
+
+while test $# -gt 0; do
+    case "$1" in
+	-*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+	*) optarg= ;;
+    esac
+
+    case $1 in
+	--prefix)
+	    echo_prefix=yes
+	    ;;
+
+	--bindir)
+	    echo_bindir=yes
+	    ;;
+
+	--includedir)
+	    echo_includedir=yes
+	    ;;
+
+	--includes)
+	    echo_includes=yes
+	    ;;
+
+	--libdir)
+	    echo_libdir=yes
+	    ;;
+
+	--libname)
+	    echo_libname=yes
+	    ;;
+
+	--link)
+	    echo_link=yes
+	    ;;
+
+	--version)
+	    echo $version
+	    ;;
+
+	*)
+	    usage 1 1>&2
+	    ;;
+    esac
+  shift
+done
+
+if test "$echo_prefix" = "yes"; then
+    echo $prefix
+fi
+
+if test "$echo_bindir" = "yes"; then
+	echo $bindir
+fi
+
+if test "$echo_includedir" = "yes"; then
+	echo $includedir
+fi
+
+if test "$echo_includes" = "yes"; then
+	if  test "$includedir" != "/usr/include"; then
+		echo "-I$includedir"
+	fi
+fi
+
+if test "$echo_libs" = "yes"; then
+    echo $libs
+fi
+
+if test "$echo_libdir" = "yes"; then
+	echo $libdir
+fi
+
+if test "$echo_libname" = "yes"; then
+	echo $libname
+fi
+
+if test "$echo_link" = "yes"; then
+	echo "-L$libdir -l$libname"
+fi
